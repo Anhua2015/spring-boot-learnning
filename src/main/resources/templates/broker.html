@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <meta content="text/html;charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}">
+    <script src="/webjars/vue/2.5.16/vue.min.js"></script>
+    <script src="https://cdn.bootcss.com/vue-resource/1.5.1/vue-resource.min.js"></script>
+</head>
+<body>
+<div id="app" class="layui-container" style="margin-top:1%">
+    <ul class="layui-nav" lay-filter="">
+        <li class="layui-nav-item"><a href="">ActiveMQ Console</a></li>
+    </ul>
+    <table class="layui-table layui-anim layui-anim-scale" lay-skin="nob">
+        <tr>
+            <td>UpTime</td>
+            <td id="times" v-on:click="get()">{{ msg.uptime }}</td>
+        </tr>
+        <tr>
+            <td>BrokerName</td>
+            <td>{{ msg.brokerName }}</td>
+        </tr>
+        <tr>
+            <td>BrokerId</td>
+            <td>{{ msg.brokerId }}</td>
+        </tr>
+        <tr>
+            <td>Connections</td>
+            <td>{{ msg.connection }}</td>
+        </tr>
+        <tr>
+            <td>MemoryLimit</td>
+            <td>{{ Math.floor(msg.memoryLimit/1024/1024) }} MB</td>
+        </tr>
+        <tr>
+            <td>StoreLimit</td>
+            <td>{{ Math.floor(msg.storeLimit/1024/1024/1024) }} GB</td>
+        </tr>
+    </table>
+</div>
+<script th:inline="javascript">
+    var vm = new Vue({
+        el:'#app',
+        data:{
+            msg:[],
+        },
+        methods:{
+            get:function(){
+                //发送get请求
+                this.$http.get('/time').then(function(res){
+                        console.log(res.body.data);
+                        this.$set(this,'msg',res.body.data);
+                    },function(){
+                        console.log('请求失败处理');
+                });
+            }
+        }
+    });
+    window.onload=function(){
+        vm.get();
+    }
+</script>
+</body>
+</html>
