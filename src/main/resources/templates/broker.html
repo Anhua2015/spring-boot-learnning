@@ -4,62 +4,97 @@
     <meta content="text/html;charset=UTF-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <link rel="stylesheet" th:href="@{/layui/css/layui.css}">
-    <script src="/webjars/vue/2.5.16/vue.min.js"></script>
-    <script src="https://cdn.bootcss.com/vue-resource/1.5.1/vue-resource.min.js"></script>
+    <script src="/webjars/jquery/1.11.1/jquery.min.js"></script>
+    <script src="/layui/layui.js"></script>
+    <script src="/js/echarts.common.min.js"></script>
 </head>
+
 <body>
 <div id="app" class="layui-container" style="margin-top:1%">
     <ul class="layui-nav" lay-filter="">
         <li class="layui-nav-item"><a href="">ActiveMQ Console</a></li>
     </ul>
-    <table class="layui-table layui-anim layui-anim-scale" lay-skin="nob">
-        <tr>
-            <td>UpTime</td>
-            <td id="times" v-on:click="get()">{{ msg.uptime }}</td>
-        </tr>
-        <tr>
-            <td>BrokerName</td>
-            <td>{{ msg.brokerName }}</td>
-        </tr>
-        <tr>
-            <td>BrokerId</td>
-            <td>{{ msg.brokerId }}</td>
-        </tr>
-        <tr>
-            <td>Connections</td>
-            <td>{{ msg.connection }}</td>
-        </tr>
-        <tr>
-            <td>MemoryLimit</td>
-            <td>{{ Math.floor(msg.memoryLimit/1024/1024) }} MB</td>
-        </tr>
-        <tr>
-            <td>StoreLimit</td>
-            <td>{{ Math.floor(msg.storeLimit/1024/1024/1024) }} GB</td>
-        </tr>
-    </table>
+    <div class="layui-row" id="broker">
+        <div class="layui-col-md7" style="height:320px">
+            <h3 style="margin-top:10px">Broker基本状态</h3>
+            <table class="layui-table layui-anim layui-anim-scale" lay-skin="nob">
+                <tr>
+                    <td>BrokerName</td>
+                    <td th:text="${broker.brokerName}"></td>
+                </tr>
+                <tr>
+                    <td>启动时间</td>
+                    <td id="times" v-on:click="get()">[[ ${broker.uptime} ]]</td>
+                </tr>
+                <tr>
+                    <td>当前连接数</td>
+                    <td>[[ ${broker.connection} ]]</td>
+                    <td>当前线程数</td>
+                    <td id="thread">[[ ${threadCount} ]]</td>
+                </tr>
+                <tr>
+                    <td>已用堆内存</td>
+                    <td>[[ ${broker.memoryPercentUsage} ]]%</td>
+                    <td>堆内存上限</td>
+                    <td>[[ ${broker.memoryLimit/1024/1024} ]] MB</td>
+                </tr>
+                <tr>
+                    <td>已用存储</td>
+                    <td>[[ ${broker.storePercentUsage} ]]%</td>
+                    <td>存储上限</td>
+                    <td>[[ ${broker.storeLimit/1024/1024/1024} ]] GB</td>
+                </tr>
+                <tr>
+                    <td>CPU使用率</td>
+                    <td id="cpu">[[ ${cpu} ]] </td>
+                    <td>堆内存使用</td>
+                    <td id="heapMemory">[[ ${heapUsed} ]] </td>
+                </tr>
+            </table>
+        </div>
+        <div class="layui-col-md5" style="height:300px; margin-top:10px">
+            <div class="layui-form">
+                <div class="layui-input-inline layui-col-md9">
+                <select class="layui-input-inline" name="chartInfo" lay-filter="chartSelect">
+                    <option value="thread">Thread</option>
+                    <option value="totalThread">Total Start Thread</option>
+                    <option value="cpu">CPU</option>
+                    <option value="heapMemory">Heap Memory</option>
+                </select>
+                </div>
+                <button class="layui-btn" style="margin-left:10px" onclick="clearInterval(int)">停止刷新</button>
+            </div>
+            <div id="charts" style="height:270px;"></div>
+        </div>
+    </div>
+    <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">队列信息</li>
+            <li>主题信息</li>
+            <li>连接情况</li>
+            <li>集群信息</li>
+        </ul>
+        <div class="layui-tab-content"></div>
+    </div>
 </div>
+<script src="dashboardCharts.js"></script>
 <script th:inline="javascript">
-    var vm = new Vue({
-        el:'#app',
-        data:{
-            msg:[],
-        },
-        methods:{
-            get:function(){
-                //发送get请求
-                this.$http.get('/time').then(function(res){
-                        console.log(res.body.data);
-                        this.$set(this,'msg',res.body.data);
-                    },function(){
-                        console.log('请求失败处理');
-                });
-            }
-        }
-    });
+    var bip=[[${broker.addr}]]
+
     window.onload=function(){
-        vm.get();
+        getCharts('thread');
     }
+
+    layui.use(['element','form'], function(){
+        var element = layui.element;
+        element.on('tab(menu)', function(data){
+            vm.getPage(this.id);
+        });
+        var form = layui.form;
+        form.on('select(chartSelect)', function(data){
+            getCharts(data.value);
+        });
+    });
 </script>
 </body>
 </html>

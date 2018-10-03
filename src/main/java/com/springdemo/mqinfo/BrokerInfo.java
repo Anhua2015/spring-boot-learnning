@@ -11,6 +11,24 @@ public class BrokerInfo {
     private int connection;
     private long memoryLimit;
     private long storeLimit;
+    private int storePercentUsage;
+    private int memoryPercentUsage;
+
+    public int getStorePercentUsage() {
+        return storePercentUsage;
+    }
+
+    public void setStorePercentUsage(int storePercentUsage) {
+        this.storePercentUsage = storePercentUsage;
+    }
+
+    public int getMemoryPercentUsage() {
+        return memoryPercentUsage;
+    }
+
+    public void setMemoryPercentUsage(int memoryPercentUsage) {
+        this.memoryPercentUsage = memoryPercentUsage;
+    }
 
     @Override
     public String toString() {
@@ -22,6 +40,8 @@ public class BrokerInfo {
                 ", connection=" + connection +
                 ", memoryLimit=" + memoryLimit +
                 ", storeLimit=" + storeLimit +
+                ", storePercentUsage=" + storePercentUsage +
+                ", memoryPercentUsage=" + memoryPercentUsage +
                 '}';
     }
 

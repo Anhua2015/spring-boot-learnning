@@ -1,0 +1,24 @@
+<div class="layui-row" id="queue" >
+    <table class="layui-table layui-anim layui-anim-scale" lay-skin="nob">
+        <thead>
+            <tr>
+                <td onclick="getQueue('queue')">Name</td>
+                <td>Pending</td>
+                <td>Producer</td>
+                <td>Consumer</td>
+                <td>Enqueue</td>
+                <td>Dequeue</td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="q in queue">
+                <td>{{ q.name }}</td>
+                <td>{{ q.queueSize }}</td>
+                <td>{{ q.producerCount }}</td>
+                <td>{{ q.consumerCount }}</td>
+                <td>{{ q.enqueueCount }}</td>
+                <td>{{ q.dequeueCount }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
