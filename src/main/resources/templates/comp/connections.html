@@ -1,5 +1,5 @@
 <div class="layui-row" id="queue" >
-    <table class="layui-table " lay-skin="nob">
+    <table class="layui-table layui-anim layui-anim-scale" lay-skin="nob">
         <thead>
             <tr>
                 <td>Name</td>
@@ -8,7 +8,6 @@
                 <td>Consumer</td>
                 <td>Enqueue</td>
                 <td>Dequeue</td>
-                <td>Operations</td>
             </tr>
         </thead>
         <tbody>
@@ -19,10 +18,6 @@
                 <td th:text="${q.consumerCount}"></td>
                 <td th:text="${q.enqueueCount}"></td>
                 <td th:text="${q.dequeueCount}"></td>
-                <td>
-                    <button class="layui-btn layui-btn-sm" th:onclick="'javascript:getConsumer('+${q.name}+',\'queue\')'">消费者</button>
-                    <button class="layui-btn layui-btn-sm" th:class="${q.consumerCount==0}? 'layui-btn layui-btn-disabled layui-btn-sm'" th:onclick="'javascript:purge('+${q.name}+')'">清理消息</button>
-                </td>
             </tr>
         </tbody>
     </table>

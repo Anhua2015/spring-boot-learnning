@@ -45,9 +45,10 @@ public class HelloController {
                 this.broker=new Broker(addr);
             }
             model.addAttribute("broker",broker.getBrokerInfo());
-            model.addAttribute("threadCount",broker.getCharts(Broker.THREAD));
-            model.addAttribute("cpu",broker.getCharts(Broker.CPU));
-            model.addAttribute("heapUsed",broker.getCharts(Broker.HEAPUSED));
+            model.addAttribute("threadCount",broker.getCharts("Thread"));
+            model.addAttribute("cpu",broker.getCharts("Cpu"));
+            model.addAttribute("heapUsed",broker.getCharts("HeapMemoryUsed"));
+            model.addAttribute("jmxOption",ChartEntity.ATTR);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -65,10 +66,31 @@ public class HelloController {
         return "comp/queue";
     }
 
-    @RequestMapping(value = "/queue",method=RequestMethod.GET)
-    @ResponseBody
-    public RespEntity<List<QueueInfo>> getQueueInfo() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        return new RespEntity<List<QueueInfo>>(RespCode.SUCCESS,this.broker.getQueues());
+    private static final String QUEUE="queue";
+    private static final String TOPIC="topic";
+    private static final String CON="connections";
+    private static final String NET="networks";
+
+
+    @RequestMapping(value = "/frame",method=RequestMethod.GET)
+    public String getFrame(@RequestParam(value = "type", required = false) String type,Model model) throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+        switch (type){
+            case QUEUE:
+                model.addAttribute(type,this.broker.getQueues());
+                break;
+            case TOPIC:
+                model.addAttribute(type,this.broker.getTopics());
+                break;
+            case CON:
+                model.addAttribute(type,this.broker.getQueues());
+                break;
+            case NET:
+                model.addAttribute(type,this.broker.getQueues());
+                break;
+            default:
+                return "";
+        }
+        return "comp/"+type;
     }
 
     @RequestMapping(value="/charts")

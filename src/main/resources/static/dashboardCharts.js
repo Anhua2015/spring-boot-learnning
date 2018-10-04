@@ -34,9 +34,18 @@
             if (bip != null){
                 addData(true,types);
                 myChart.setOption({
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'line'
+                        }
+                    },
                     xAxis: {
                         type: 'category',
                         boundaryGap: true,
+                        axisPointer: {
+                            type:'line'
+                        },
                         data: date
                     },
                     yAxis: {

@@ -3,6 +3,7 @@ package com.springdemo.mqinfo;
 import com.springdemo.entity.ChartEntity;
 
 import javax.management.*;
+import javax.management.openmbean.CompositeData;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -74,21 +75,42 @@ public class Broker {
         }
         return list;
     }
-    public static String THREAD="thread";
-    public static String CPU="cpu";
-    public static String HEAPUSED="heapMemory";
+
+    public List<TopicInfo> getTopics() throws MalformedObjectNameException, AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException, IOException {
+        List<TopicInfo> list = new ArrayList<>();
+        ObjectName objectName=new ObjectName("org.apache.activemq:brokerName="+this.addr+",type=Broker");
+        for (ObjectName name : (ObjectName[]) mbsc.getAttribute(objectName,"Topics")) {
+            TopicInfo qi = new TopicInfo();
+            qi.setName((String) mbsc.getAttribute(name,"Name"));
+            qi.setConsumerCount((long) mbsc.getAttribute(name,"ConsumerCount"));
+            qi.setDequeueCount((long) mbsc.getAttribute(name,"DequeueCount"));
+            qi.setEnqueueCount((long) mbsc.getAttribute(name,"EnqueueCount"));
+            qi.setForwardCount((long) mbsc.getAttribute(name,"ForwardCount"));
+            list.add(qi);
+        }
+        return list;
+    }
 
     public Object getCharts(String type) throws MalformedObjectNameException, AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException, IOException {
-        if(HEAPUSED.equalsIgnoreCase(type)) {
-            MemoryMXBean memBean= ManagementFactory.newPlatformMXBeanProxy(mbsc,ManagementFactory.MEMORY_MXBEAN_NAME, MemoryMXBean.class);
-            MemoryUsage heap = memBean.getHeapMemoryUsage();
-            long heapSizeUsed = heap.getUsed();
-            double used = heapSizeUsed / 1024 / 1024 ;
-            return used;
-        } else if (ChartEntity.ATTR.containsKey(type)) {
+        if (ChartEntity.ATTR.containsKey(type)) {
             ObjectName on = (ObjectName) ChartEntity.ATTR.get(type).get("ObjectName");
             String attr = (String) ChartEntity.ATTR.get(type).get("Attribute");
-            return mbsc.getAttribute(on,attr);
+            String[] attrLayer=attr.split("::");
+            Object res;
+            if (attrLayer.length>=2){
+                CompositeData cd = (CompositeData) mbsc.getAttribute(on,attrLayer[0]);
+                res = cd.get(attrLayer[1]);
+            } else {
+                res = mbsc.getAttribute(on,attr);
+            }
+            switch (type) {
+                case "Cpu":
+                    return (double)Math.round((Double)res*1000)/1000;
+                case "HeapMemoryUsed":
+                    return (long)res /1024/1024;
+                default:
+                    return res;
+            }
         } else {
             return 0;
         }

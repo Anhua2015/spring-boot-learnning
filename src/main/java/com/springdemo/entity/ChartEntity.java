@@ -13,10 +13,15 @@ public class ChartEntity {
 
     static String MEMORY="java.lang:type=Memory";
 
+    public static final String[][] NAME = {{"Cpu",OPERATING,"ProcessCpuLoad"}
+                                            ,{"Thread",THREADING,"ThreadCount"}
+                                            ,{"TotalThread",THREADING,"TotalStartedThreadCount"}
+    ,{"HeapMemoryUsed",MEMORY,"HeapMemoryUsage::used"}};
+
     public static void init() throws MalformedObjectNameException {
-        ATTR.put("thread",getJmxMap(THREADING,"ThreadCount"));
-        ATTR.put("cpu",getJmxMap(OPERATING,"ProcessCpuLoad"));
-        ATTR.put("totalThread",getJmxMap(THREADING,"TotalStartedThreadCount"));
+        for (int i=0;i<NAME.length;i++){
+            ATTR.put(NAME[i][0],getJmxMap(NAME[i][1],NAME[i][2]));
+        }
     }
 
     public static HashMap<String,Object> getJmxMap(String objectName, String attr) throws MalformedObjectNameException {

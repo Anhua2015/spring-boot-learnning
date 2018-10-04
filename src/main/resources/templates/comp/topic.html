@@ -1,0 +1,24 @@
+<div class="layui-row" id="queue" >
+    <table class="layui-table layui-anim layui-anim-scale" lay-skin="nob">
+        <thead>
+            <tr>
+                <td>Name</td>
+                <td>Consumer</td>
+                <td>Enqueue</td>
+                <td>Dequeue</td>
+                <td>Operations</td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="t:${topic}">
+                <td th:text="${t.name}"></td>
+                <td th:text="${t.consumerCount}"></td>
+                <td th:text="${t.enqueueCount}"></td>
+                <td th:text="${t.dequeueCount}"></td>
+                <td>
+                    <button class="layui-btn layui-btn-sm" th:onclick="'javascript:getConsumer('+${t.name}+',\'topic\')'">消费者</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

@@ -17,7 +17,7 @@
     <div class="layui-row" id="broker">
         <div class="layui-col-md7" style="height:320px">
             <h3 style="margin-top:10px">Broker基本状态</h3>
-            <table class="layui-table layui-anim layui-anim-scale" lay-skin="nob">
+            <table class="layui-table " lay-skin="nob">
                 <tr>
                     <td>BrokerName</td>
                     <td th:text="${broker.brokerName}"></td>
@@ -30,7 +30,7 @@
                     <td>当前连接数</td>
                     <td>[[ ${broker.connection} ]]</td>
                     <td>当前线程数</td>
-                    <td id="thread">[[ ${threadCount} ]]</td>
+                    <td id="Thread">[[ ${threadCount} ]]</td>
                 </tr>
                 <tr>
                     <td>已用堆内存</td>
@@ -46,20 +46,18 @@
                 </tr>
                 <tr>
                     <td>CPU使用率</td>
-                    <td id="cpu">[[ ${cpu} ]] </td>
+                    <td><span id="Cpu">[[ ${cpu} ]] </span>%</td>
                     <td>堆内存使用</td>
-                    <td id="heapMemory">[[ ${heapUsed} ]] </td>
+                    <td><span id="HeapMemoryUsed">[[ ${heapUsed} ]] </span>MB</td>
                 </tr>
             </table>
         </div>
         <div class="layui-col-md5" style="height:300px; margin-top:10px">
             <div class="layui-form">
                 <div class="layui-input-inline layui-col-md9">
-                <select class="layui-input-inline" name="chartInfo" lay-filter="chartSelect">
-                    <option value="thread">Thread</option>
-                    <option value="totalThread">Total Start Thread</option>
-                    <option value="cpu">CPU</option>
-                    <option value="heapMemory">Heap Memory</option>
+                <select class="layui-input-inline" name="chartInfo" lay-filter="chartSelect" lay-search>
+                    <option value="">Select An Attribute</option>
+                    <option th:each="option:${jmxOption}" th:value="${option.key}">[[${option.key}]]</option>
                 </select>
                 </div>
                 <button class="layui-btn" style="margin-left:10px" onclick="clearInterval(int)">停止刷新</button>
@@ -67,14 +65,14 @@
             <div id="charts" style="height:270px;"></div>
         </div>
     </div>
-    <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+    <div class="layui-tab layui-tab-brief" lay-filter="menu">
         <ul class="layui-tab-title">
-            <li class="layui-this">队列信息</li>
-            <li>主题信息</li>
-            <li>连接情况</li>
-            <li>集群信息</li>
+            <li class="layui-this" id="queue">队列信息</li>
+            <li id="topic">主题信息</li>
+            <li id="connections">连接情况</li>
+            <li id="networks">集群信息</li>
         </ul>
-        <div class="layui-tab-content"></div>
+        <div class="layui-tab-content" id="contentPlace"></div>
     </div>
 </div>
 <script src="dashboardCharts.js"></script>
@@ -82,19 +80,35 @@
     var bip=[[${broker.addr}]]
 
     window.onload=function(){
-        getCharts('thread');
+        getPage('queue');
+        console.log([[${jmxOption}]]);
     }
 
     layui.use(['element','form'], function(){
         var element = layui.element;
         element.on('tab(menu)', function(data){
-            vm.getPage(this.id);
+            console.log(this.id);
+            getPage(this.id);
         });
         var form = layui.form;
         form.on('select(chartSelect)', function(data){
-            getCharts(data.value);
+            if (''==data.value){
+                clearInterval(int);
+            } else {
+                getCharts(data.value);
+            }
         });
     });
+
+    function getPage(types) {
+        $.ajax({
+            url:'/frame?type='+types,
+            type:'GET',
+            success:function(result){
+                $("#contentPlace").html(result);
+            }
+        });
+    }
 </script>
 </body>
 </html>
